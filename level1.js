@@ -1,0 +1,189 @@
+export default class Level1 extends Phaser.Scene {
+  constructor() {
+    super('Level1');
+  }
+
+  // Preload assets
+  preload() {
+    for (let i = 0; i <= 17; i++) {
+      const frame = i.toString().padStart(3, '0');
+      this.load.image(`idle_${i}`, `Assets/Character Sprite/Fallen_Angels_2/PNG Sequences/Idle/0_Fallen_Angels_Idle_${frame}.png`);
+    }
+
+    // Explicitly load first frame as player placeholder sprite
+    this.load.image('idle0', 'Assets/Character Sprite/Fallen_Angels_2/PNG/PNG Sequences/Idle/0_Fallen_Angels_Idle_000.png');
+
+    for (let i = 2; i <= 3; i++) {
+      this.load.image(`floor${i}`, `Assets/Platforms/ceiling_${i}.png`);
+    }
+
+    this.load.image('flag', 'Assets/flag.png');
+
+    // Preload running frames (12 frames, 000-011)
+    for (let i = 0; i <= 11; i++) {
+      const frame = i.toString().padStart(3, '0');
+      this.load.image(`run_${i}`, `Assets/Character Sprite/Fallen_Angels_2/PNG/PNG Sequences/Running/0_Fallen_Angels_Running_${frame}.png`);
+    }
+  }
+
+  // Create game objects and setup scene
+  create() {
+    const tileSize = 32;
+    const screenHeight = this.scale.height;
+    const layerCount = 25;
+    const spacingY = 110;
+
+    // Create platform group
+    this.platforms = this.physics.add.staticGroup();
+    this.shadow = null;
+
+    // Create ground platforms
+    for (let i = 0; i < 30; i++) {
+      const tileKey = `floor${Phaser.Math.Between(2, 3)}`;
+      this.platforms.create(i * tileSize, screenHeight - tileSize, tileKey).setOrigin(0).refreshBody();
+    }
+
+    // Create layered platforms
+    let prevXs = [300];
+    for (let level = 1; level <= layerCount; level++) {
+      const y = screenHeight - tileSize - level * spacingY;
+      const platformCount = Phaser.Math.Between(3, 5);
+      const levelXs = [];
+
+      for (let i = 0; i < platformCount; i++) {
+        let x = Phaser.Math.Clamp((prevXs[i % prevXs.length] || 400) + Phaser.Math.Between(-150, 150), 50, 700);
+        if (levelXs.every(val => Math.abs(val - x) >= 80)) {
+          levelXs.push(x);
+          const width = Phaser.Math.Between(1, 2);
+          for (let j = 0; j < width; j++) {
+            const px = x + j * tileSize;
+            const tileKey = `floor${Phaser.Math.Between(2, 3)}`;
+            this.platforms.create(px, y, tileKey).setOrigin(0).refreshBody();
+          }
+        }
+      }
+
+      prevXs = [...levelXs];
+      this.add.text(10, y - 8, `L${level}`, { fontSize: '12px', fill: '#fff' });
+
+      if (level === layerCount) {
+        this.topY = y;
+        this.topX = levelXs[0];
+      }
+    }
+
+    // this.player = this.physics.add.sprite(100, screenHeight - 400, 'floor1'); // Just as a placeholder
+    // this.player.setBounce(0.2);
+    // this.player.setCollideWorldBounds(true);\
+
+    this.player = this.physics.add.sprite(100, screenHeight-200, 'idle0');
+    this.player.setDisplaySize(64, 64);        
+    this.player.setSize(32, 32);               
+    // this.player.body.setOffset(0, 0);       
+    // this.player.setOrigin(0, 1);              
+    // this.player.setBounce(0.2);
+    this.player.setCollideWorldBounds(true);
+    this.player.play('idle');
+
+    // Create running animation
+    this.anims.create({
+      key: 'run',
+      frames: Array.from({length: 12}, (_, i) => ({ key: `run_${i}` })),
+      frameRate: 16,
+      repeat: -1
+    });
+
+    // Setup collisions
+    this.physics.add.collider(this.player, this.platforms);
+
+    // Create flag
+    this.flag = this.physics.add.sprite(this.topX + 16, this.topY - 40, 'flag');
+    this.flag.setImmovable(true);
+    this.flag.body.allowGravity = false;
+
+    this.physics.add.overlap(this.player, this.flag, () => this.scene.start('Level2'));
+
+    // Create timer
+    this.timer = this.time.addEvent({ delay: 180000 }); // 3 minutes
+    this.timerText = this.add.text(16, 16, 'Time: 3:00', {
+      fontSize: '20px',
+      fill: '#ffffff'
+    }).setScrollFactor(0);
+
+    // Setup camera
+    this.cameras.main.startFollow(this.player);
+    this.cameras.main.setBounds(0, this.topY - 100, this.scale.width, screenHeight - this.topY + 100);
+    this.physics.world.setBounds(0, this.topY - 100, this.scale.width, screenHeight - this.topY + 100);
+    this.cameras.main.roundPixels = true;
+
+    // Setup controls and double jump variables
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.keyQ = this.input.keyboard.addKey('Q');
+    this.keyW = this.input.keyboard.addKey('W');
+    this.keySpace = this.input.keyboard.addKey('SPACE');
+    this.jumps = 0;
+    this.maxJumps = 1;
+    this.jumpButtonDown = false;
+  }
+
+  // Update loop: handle movement, jumping, shadow, and timer
+  update() {
+    const speed = 160;
+    const jumpPower = -500;
+
+    // Handle left/right movement and running animation
+    if (this.cursors.left.isDown) {
+      this.player.setVelocityX(-speed);
+      this.player.flipX = true;
+      if (this.player.anims.currentAnim?.key !== 'run') this.player.play('run');
+    } else if (this.cursors.right.isDown) {
+      this.player.setVelocityX(speed);
+      this.player.flipX = false;
+      if (this.player.anims.currentAnim?.key !== 'run') this.player.play('run');
+    } else {
+      this.player.setVelocityX(0);
+      if (this.player.anims.currentAnim?.key !== 'idle') this.player.play('idle');
+    }
+
+    // Double jump logic
+    if ((this.cursors.up.isDown || (this.keySpace && this.keySpace.isDown)) && this.jumps < this.maxJumps && !this.jumpButtonDown) {
+      this.player.setVelocityY(jumpPower);
+      this.jumps++;
+      this.jumpButtonDown = true;
+    }
+    if (!(this.cursors.up.isDown || (this.keySpace && this.keySpace.isDown))) {
+      this.jumpButtonDown = false;
+    }
+    if (this.player.body.touching.down) {
+      this.jumps = 0;
+    }
+
+    // Shadow placement logic
+    if (Phaser.Input.Keyboard.JustDown(this.keyQ)) {
+      if (this.shadow) return;
+      this.shadow = this.physics.add.sprite(this.player.x, this.player.y, 'idle0');
+      this.shadow.setDisplaySize(64, 64);
+      this.shadow.setSize(32, 32);
+      this.shadow.setAlpha(0.5);
+      this.shadow.body.allowGravity = false;
+      this.shadow.setImmovable(true);
+    }
+
+    // Shadow swap logic
+    if (Phaser.Input.Keyboard.JustDown(this.keyW) && this.shadow) {
+      this.player.setPosition(this.shadow.x, this.shadow.y);
+      this.shadow.destroy();
+      this.shadow = null;
+    }
+
+    // Timer countdown
+    const totalSec = Math.max(0, Math.floor((180000 - this.timer.getElapsed()) / 1000));
+    const minutes = Math.floor(totalSec / 60);
+    const seconds = totalSec % 60;
+    this.timerText.setText(`Time: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+
+    if (totalSec <= 0) {
+      this.scene.start('DefeatScreen');
+    }
+  }
+}
