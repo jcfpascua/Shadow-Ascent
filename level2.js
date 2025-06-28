@@ -6,7 +6,7 @@ export default class Level2 extends Phaser.Scene {
   // Preload assets
   preload() {
     this.load.image('brick', 'Assets/brick_1.png');
-    this.load.image('flag', 'Assets/flag.png');
+    this.load.image('flag', 'Assets/flag/flag.png');
     for (let i = 2; i <= 3; i++) {
       this.load.image(`floor${i}`, `Assets/Platforms/ceiling_${i}.png`);
     }
@@ -15,11 +15,16 @@ export default class Level2 extends Phaser.Scene {
       this.load.image(`idle_${i}`, `Assets/Character Sprite/Fallen_Angels_2/PNG Sequences/Idle/0_Fallen_Angels_Idle_${frame}.png`);
     }
     this.load.image('idle0', 'Assets/Character Sprite/Fallen_Angels_2/PNG/PNG Sequences/Idle/0_Fallen_Angels_Idle_000.png');
-    // Preload running frames (12 frames, 000-011)
+    // Preload running frames 
     for (let i = 0; i <= 11; i++) {
       const frame = i.toString().padStart(3, '0');
       this.load.image(`run_${i}`, `Assets/Character Sprite/Fallen_Angels_2/PNG/PNG Sequences/Running/0_Fallen_Angels_Running_${frame}.png`);
     }
+    // Load jump sound effect
+    this.load.audio('jumpSound', 'Assets/SFX/jump_trim.wav');
+    // Load shadow sound effects
+    this.load.audio('shadowDrop', 'Assets/SFX/shadow_drop1.wav');
+    this.load.audio('shadowSwap', 'Assets/SFX/shadow_swap.wav');
   }
 
   // Create game objects and setup scene
@@ -88,7 +93,7 @@ export default class Level2 extends Phaser.Scene {
     }).setScrollFactor(0);
 
     // Create player
-    this.player = this.physics.add.sprite(100, screenHeight - 400, 'idle0');
+    this.player = this.physics.add.sprite(100, screenHeight - 200, 'idle0');
     this.player.setDisplaySize(64, 64);
     this.player.setSize(32, 32);
     this.player.setBounce(0.2);
@@ -128,7 +133,6 @@ export default class Level2 extends Phaser.Scene {
     this.jumpButtonDown = false;
   }
 
-  // Update loop: handle movement, jumping, shadow, and timer
   update() {
     const speed = 160;
     const jumpPower = -500;
@@ -152,6 +156,7 @@ export default class Level2 extends Phaser.Scene {
       this.player.setVelocityY(jumpPower);
       this.jumps++;
       this.jumpButtonDown = true;
+      this.sound.play('jumpSound');
     }
     if (!(this.cursors.up.isDown || (this.keySpace && this.keySpace.isDown))) {
       this.jumpButtonDown = false;
@@ -169,6 +174,7 @@ export default class Level2 extends Phaser.Scene {
         this.shadow.setAlpha(0.5);
         this.shadow.body.allowGravity = false;
         this.shadow.setImmovable(true);
+        this.sound.play('shadowDrop');
       }
     }
 
@@ -177,6 +183,7 @@ export default class Level2 extends Phaser.Scene {
       this.player.setPosition(this.shadow.x, this.shadow.y);
       this.shadow.destroy();
       this.shadow = null;
+      this.sound.play('shadowSwap');
     }
 
     // Timer countdown

@@ -5,36 +5,48 @@ export default class MainMenu extends Phaser.Scene {
 
   create() {
     const centerX = this.scale.width / 2;
-    let offsetY = 150;
+    const centerY = this.scale.height / 2;
+    const titleFontSize = 36;
+    const buttonFontSize = 24;
+    const creditFontSize = 16;
+    const titleSpacing = 40;
+    const buttonSpacing = 32;
+    const creditSpacing = 48;
 
-    this.add.text(centerX, 80, 'Shadow Ascent', {
-      fontSize: '36px',
+    const totalHeight = titleFontSize + titleSpacing + (3 * buttonFontSize) + (2 * buttonSpacing) + creditSpacing + creditFontSize;
+    let offsetY = centerY - totalHeight / 2;
+
+    // Title
+    this.add.text(centerX, offsetY, 'Shadow Ascent', {
+      fontSize: `${titleFontSize}px`,
       color: '#ffffff'
     }).setOrigin(0.5);
+    offsetY += titleFontSize + titleSpacing;
 
-    const playBtn = this.add.text(centerX, offsetY, 'Play (Level 1)', {
-      fontSize: '24px',
+    // Level 1
+    const playBtn = this.add.text(centerX, offsetY, 'Level 1', {
+      fontSize: `${buttonFontSize}px`,
       color: '#00ff00'
     }).setOrigin(0.5).setInteractive();
+    offsetY += buttonFontSize + buttonSpacing;
 
-    offsetY += 40;
-
+    // Level 2
     const level2Btn = this.add.text(centerX, offsetY, 'Level 2', {
-      fontSize: '24px',
+      fontSize: `${buttonFontSize}px`,
       color: '#00ffff'
     }).setOrigin(0.5).setInteractive();
+    offsetY += buttonFontSize + buttonSpacing;
 
-    offsetY += 40;
-
+    // Level 3
     const level3Btn = this.add.text(centerX, offsetY, 'Level 3', {
-      fontSize: '24px',
+      fontSize: `${buttonFontSize}px`,
       color: '#ffff00'
     }).setOrigin(0.5).setInteractive();
+    offsetY += buttonFontSize + creditSpacing;
 
-    offsetY += 60;
-
-    this.add.text(centerX, offsetY, 'Credits: Made by Seed', {
-      fontSize: '16px',
+    // Credits
+    this.add.text(centerX, offsetY, 'Made by Rico Dayoc and Jericho Cid Pascua', {
+      fontSize: `${creditFontSize}px`,
       color: '#aaaaaa'
     }).setOrigin(0.5);
 
