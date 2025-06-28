@@ -82,7 +82,7 @@ export default class Level1 extends Phaser.Scene {
     // this.player.setBounce(0.2);
     // this.player.setCollideWorldBounds(true);\
 
-    this.player = this.physics.add.sprite(100, screenHeigh - 200, 'idle0');
+    this.player = this.physics.add.sprite(100, screenHeight - 200, 'idle0');
     this.player.setDisplaySize(64, 64);        
     this.player.setSize(32, 32);               
     // this.player.body.setOffset(0, 0);       
@@ -132,6 +132,7 @@ export default class Level1 extends Phaser.Scene {
     this.jumpButtonDown = false;
   }
 
+  // Update loop: handle movement, jumping, shadow, and timer
   update() {
     const speed = 160;
     const jumpPower = -500;

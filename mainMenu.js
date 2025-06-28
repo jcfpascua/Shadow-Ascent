@@ -5,60 +5,43 @@ export default class MainMenu extends Phaser.Scene {
 
   create() {
     const centerX = this.scale.width / 2;
-    const centerY = this.scale.height / 2;
-    const titleFontSize = 36;
-    const buttonFontSize = 24;
-    const creditFontSize = 16;
-    const titleSpacing = 40;
-    const buttonSpacing = 32;
-    const creditSpacing = 48;
+    const itemSpacing = 40;
+    const items = [
+      { text: 'Level 1', color: '#00ff00' },
+      { text: 'Level 2', color: '#00ffff' },
+      { text: 'Level 3', color: '#ffff00' }
+    ];
+    const titleHeight = 60;
+    const creditsHeight = 60;
+    const totalMenuHeight = titleHeight + items.length * itemSpacing + creditsHeight;
+    let offsetY = (this.scale.height - totalMenuHeight) / 2 + titleHeight;
 
-    const totalHeight = titleFontSize + titleSpacing + (3 * buttonFontSize) + (2 * buttonSpacing) + creditSpacing + creditFontSize;
-    let offsetY = centerY - totalHeight / 2;
-
-    // Title
-    this.add.text(centerX, offsetY, 'Shadow Ascent', {
-      fontSize: `${titleFontSize}px`,
+    this.add.text(centerX, offsetY - titleHeight, 'Shadow Ascent', {
+      fontSize: '36px',
       color: '#ffffff'
     }).setOrigin(0.5);
-    offsetY += titleFontSize + titleSpacing;
 
-    // Level 1
-    const playBtn = this.add.text(centerX, offsetY, 'Level 1', {
-      fontSize: `${buttonFontSize}px`,
-      color: '#00ff00'
-    }).setOrigin(0.5).setInteractive();
-    offsetY += buttonFontSize + buttonSpacing;
+    const btns = [];
+    items.forEach((item, i) => {
+      const btn = this.add.text(centerX, offsetY + i * itemSpacing, item.text, {
+        fontSize: '24px',
+        color: item.color
+      }).setOrigin(0.5).setInteractive();
+      btns.push(btn);
+    });
 
-    // Level 2
-    const level2Btn = this.add.text(centerX, offsetY, 'Level 2', {
-      fontSize: `${buttonFontSize}px`,
-      color: '#00ffff'
-    }).setOrigin(0.5).setInteractive();
-    offsetY += buttonFontSize + buttonSpacing;
-
-    // Level 3
-    const level3Btn = this.add.text(centerX, offsetY, 'Level 3', {
-      fontSize: `${buttonFontSize}px`,
-      color: '#ffff00'
-    }).setOrigin(0.5).setInteractive();
-    offsetY += buttonFontSize + creditSpacing;
-
-    // Credits
-    this.add.text(centerX, offsetY, 'Made by Rico Dayoc and Jericho Cid Pascua', {
-      fontSize: `${creditFontSize}px`,
+    this.add.text(centerX, offsetY + items.length * itemSpacing + 20, 'Made by Rico Dayoc and Jericho Cid Pascua', {
+      fontSize: '16px',
       color: '#aaaaaa'
     }).setOrigin(0.5);
 
-    playBtn.on('pointerdown', () => {
+    btns[0].on('pointerdown', () => {
       this.scene.start('Level1');
     });
-
-    level2Btn.on('pointerdown', () => {
+    btns[1].on('pointerdown', () => {
       this.scene.start('Level2');
     });
-
-    level3Btn.on('pointerdown', () => {
+    btns[2].on('pointerdown', () => {
       this.scene.start('Level3');
     });
   }

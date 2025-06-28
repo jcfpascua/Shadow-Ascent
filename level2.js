@@ -15,7 +15,7 @@ export default class Level2 extends Phaser.Scene {
       this.load.image(`idle_${i}`, `Assets/Character Sprite/Fallen_Angels_2/PNG Sequences/Idle/0_Fallen_Angels_Idle_${frame}.png`);
     }
     this.load.image('idle0', 'Assets/Character Sprite/Fallen_Angels_2/PNG/PNG Sequences/Idle/0_Fallen_Angels_Idle_000.png');
-    // Preload running frames 
+    // Preload running frames (12 frames, 000-011)
     for (let i = 0; i <= 11; i++) {
       const frame = i.toString().padStart(3, '0');
       this.load.image(`run_${i}`, `Assets/Character Sprite/Fallen_Angels_2/PNG/PNG Sequences/Running/0_Fallen_Angels_Running_${frame}.png`);
@@ -133,6 +133,7 @@ export default class Level2 extends Phaser.Scene {
     this.jumpButtonDown = false;
   }
 
+  // Update loop: handle movement, jumping, shadow, and timer
   update() {
     const speed = 160;
     const jumpPower = -500;

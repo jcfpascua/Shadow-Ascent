@@ -133,7 +133,7 @@ export default class Level3 extends Phaser.Scene {
     this.jumpButtonDown = false;
   }
 
-  // Update loop
+  // Update loop: handle movement, jumping, shadow, and timer
   update() {
     const speed = 160;
     const jumpPower = -500;
